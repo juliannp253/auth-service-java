@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name = "users") // usa 'users' en plural
+@Table(name = "users")  //  indica el nombre de la tabla
 public class User {
 
     @Id

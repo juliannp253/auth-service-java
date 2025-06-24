@@ -1,9 +1,11 @@
 package com.julian.authservice.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -37,4 +39,33 @@ public class JwtUtil {
     }
 
     // [Más adelante agregaremos métodos como validateToken y getSubjectFromToken]
+    //  Extraer el subject (email) del token
+    public String extractUsername(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
+    //  Verificar si el token ha expirado
+    public boolean isTokenExpired(String token) {
+        return extractAllClaims(token).getExpiration().before(new Date());
+    }
+
+    //  Verificar que el token sea válido para un UserDetails
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        String username = extractUsername(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    }
+
+    //  Reutilizable: extrae todos los claims (datos del token)
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSignKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    //  Tu método existente para la clave
+    private Key getSignKey() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
 }

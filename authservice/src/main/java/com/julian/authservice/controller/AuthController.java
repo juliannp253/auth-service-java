@@ -2,6 +2,7 @@ package com.julian.authservice.controller;
 
 import com.julian.authservice.dto.LoginRequest;
 import com.julian.authservice.dto.LoginResponse;
+import com.julian.authservice.dto.UserDTO;
 import com.julian.authservice.model.User;
 import com.julian.authservice.security.JwtUtil;
 import com.julian.authservice.service.UserService;
@@ -54,5 +55,18 @@ public class AuthController {
         // Devolver token en JSON
         return ResponseEntity.ok(new LoginResponse(token));
     }
+
+    @GetMapping("/api/protegida")
+    public ResponseEntity<String> protegida() {
+        return ResponseEntity.ok("¡Acceso autorizado con JWT!");
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getProfile() {
+        User user = userService.getCurrentUser();
+        UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), user.getEmail());
+        return ResponseEntity.ok(userDTO);
+    }
+
 
 }

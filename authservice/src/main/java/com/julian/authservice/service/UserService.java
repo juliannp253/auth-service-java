@@ -1,45 +1,75 @@
 package com.julian.authservice.service;
 
+import com.julian.authservice.dto.LoginRequest;
+import com.julian.authservice.dto.LoginResponse;
+import com.julian.authservice.dto.RegisterRequest;
+//import com.julian.authservice.model.Role;
 import com.julian.authservice.model.User;
 import com.julian.authservice.repository.UserRepository;
+import com.julian.authservice.security.JwtUtil;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+
+import static com.julian.authservice.model.Role.USER;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder; // ← cambia tipo a interfaz
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil) {
         this.userRepository = userRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder(); // Inicialización local
+        this.passwordEncoder = passwordEncoder; // ← ya no uses new BCrypt
+        this.jwtUtil = jwtUtil;
     }
 
-    public User registerUser(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
+    public User registerUser(RegisterRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("El correo ya está registrado");
         }
 
-        if (userRepository.existsByUsername(user.getUsername())) {
+        if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("El nombre de usuario ya está en uso");
         }
 
-        // Encriptar la contraseña
-        String hashedPassword = passwordEncoder.encode(user.getPassword());
+        String hashedPassword = passwordEncoder.encode(request.getPassword());
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
         user.setPassword(hashedPassword);
-
-        // Establecer fecha de creación
         user.setCreatedAt(LocalDateTime.now());
+        user.setRole(USER);
 
-        // Guardar en la base de datos
+
         return userRepository.save(user);
+    }
+
+    public LoginResponse loginUser(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Contraseña incorrecta");
+        }
+
+        String accessToken = jwtUtil.generateAccessToken(user);
+        String refreshToken = jwtUtil.generateRefreshToken(user);
+
+        return new LoginResponse(accessToken, refreshToken);
     }
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);

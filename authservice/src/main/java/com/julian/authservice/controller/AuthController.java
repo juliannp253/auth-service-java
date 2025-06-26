@@ -2,15 +2,25 @@ package com.julian.authservice.controller;
 
 import com.julian.authservice.dto.LoginRequest;
 import com.julian.authservice.dto.LoginResponse;
+import com.julian.authservice.dto.RegisterRequest;
 import com.julian.authservice.dto.UserDTO;
 import com.julian.authservice.model.User;
 import com.julian.authservice.security.JwtUtil;
 import com.julian.authservice.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -29,31 +39,48 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Operation(summary = "Registrar un nuevo usuario")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuario registrado con éxito"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o usuario ya existe")
+    }) // Anotaciones de descripción del metodo
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        User newUser = userService.registerUser(user);
+    public ResponseEntity<User> registerUser(@Valid @RequestBody RegisterRequest request) {
+        User newUser = userService.registerUser(request);
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        // Buscar usuario por email
-        User user = userService.findByEmail(loginRequest.getEmail());
-
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Correo incorrecto");
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+        try {
+            LoginResponse response = userService.loginUser(loginRequest);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
 
-        // Validar contraseña
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Contraseña incorrecta");
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, String>> refreshToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+
+        try {
+            String userEmail = jwtUtil.extractUsername(refreshToken);
+            User user = userService.findByEmail(userEmail);
+
+            if (!jwtUtil.isTokenExpired(refreshToken)) {
+                String newAccessToken = jwtUtil.generateAccessToken(user);
+
+                Map<String, String> response = new HashMap<>();
+                response.put("accessToken", newAccessToken);
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Refresh token expirado"));
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Refresh token inválido"));
         }
-
-        // Generar JWT
-        String token = jwtUtil.generateToken(user.getEmail());
-
-        // Devolver token en JSON
-        return ResponseEntity.ok(new LoginResponse(token));
     }
 
     @GetMapping("/api/protegida")
@@ -68,5 +95,10 @@ public class AuthController {
         return ResponseEntity.ok(userDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/dashboard")
+    public ResponseEntity<String> adminDashboard() {
+        return ResponseEntity.ok("Panel de administración");
+    }
 
 }

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+import com.julian.authservice.dto.LoginResponse;
+
 @Entity(name = "users") // usa 'users' en plural
 @Table(name = "users")  //  indica el nombre de la tabla
 public class User {
@@ -22,6 +24,10 @@ public class User {
     private String password;
 
     private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 
     // Constructor vacío necesario para JPA
     public User() {}
@@ -72,4 +78,15 @@ public class User {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+
+
 }

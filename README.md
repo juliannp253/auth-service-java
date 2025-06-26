@@ -49,7 +49,57 @@ Construir una API REST de autenticación reutilizable para cualquier aplicación
  ┣ 📂security         # JWT, filtros, configuración de seguridad
  ┣ 📜 application.properties / application.yml
  ┗ 📜 README.md
-
+```
 ---
 ## 🌐 Endpoints implementados
+
+🔐 /auth/register
+- **Método:** POST
+- **Acceso:** Público
+- **Acciones:**
+    - Encripta contraseñas
+    - Guarda usuario
+    - Asigna rol **USER**
+
+🔐 /auth/login
+- **Método:** POST
+- **Acceso:** Público
+- **Acciones:**
+    - Verifica credenciales
+    - Retorna accessToken (15 min) y refreshToken (7 días)
+
+🔄 /auth/refresh
+- **Método:** POST
+- **Acceso:** Público
+- **Acciones:**
+    - Verifica refreshToken
+    - Retorna nuevo accessToken
+
+🔒 /user/me
+- **Método:** GET
+- **Acceso:** Privado
+    - Retorna usuario actual autenticado (token requerido)
+
+---
+🔐 Seguridad
+JWT
+Generación y validación de tokens con JwtUtil
+
+Tokens firmados con HMAC SHA-256
+
+Header: Authorization: Bearer <token>
+
+Spring Security
+Stateless JWT
+
+Rutas /auth/**, /swagger-ui/** y /v3/api-docs/** abiertas
+
+Filtro personalizado: JwtAuthenticationFilter
+
+Roles con @PreAuthorize
+
+BCrypt
+Contraseñas cifradas con BCryptPasswordEncoder
+
+Comparación segura durante login
 

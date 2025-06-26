@@ -8,7 +8,7 @@
 
 **Julian P. Nuñez**
 
-📫 [Tu LinkedIn / GitHub]
+📫 [[GitHub](https://github.com/juliannp253)]
 
 ---
 
@@ -49,3 +49,7 @@ Construir una API REST de autenticación reutilizable para cualquier aplicación
  ┣ 📂security         # JWT, filtros, configuración de seguridad
  ┣ 📜 application.properties / application.yml
  ┗ 📜 README.md
+
+---
+## 🌐 Endpoints implementados
+

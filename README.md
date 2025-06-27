@@ -82,24 +82,22 @@ Construir una API REST de autenticación reutilizable para cualquier aplicación
 
 ---
 🔐 Seguridad
-JWT
-Generación y validación de tokens con JwtUtil
+**JWT**
+- Tokens firmados con HMAC SHA-256
+- Se envía por header:
+  Authorization: Bearer <access_token>
+- Clase **JwtUtil**:
+ - generateAccessToken()
+ - generateRefreshToken()
+ - extractUsername()
+ - isTokenValid()
 
-Tokens firmados con HMAC SHA-256
+**Spring Security**
+- Stateless (sin sesiones)
+- Rutas públicas: **/auth/****, **/swagger-ui/**, **/v3/api-docs/****
+- Filtro personalizado: JwtAuthenticationFilter
+- Roles con **@PreAuthorize** y **@EnableMethodSecurity**
 
-Header: Authorization: Bearer <token>
-
-Spring Security
-Stateless JWT
-
-Rutas /auth/**, /swagger-ui/** y /v3/api-docs/** abiertas
-
-Filtro personalizado: JwtAuthenticationFilter
-
-Roles con @PreAuthorize
-
-BCrypt
-Contraseñas cifradas con BCryptPasswordEncoder
-
-Comparación segura durante login
-
+**BCrypt**
+- Contraseñas hasheadas con BCryptPasswordEncoder
+- Comparación segura en login

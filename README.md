@@ -81,16 +81,16 @@ Construir una API REST de autenticación reutilizable para cualquier aplicación
     - Retorna usuario actual autenticado (token requerido)
 
 ---
-🔐 Seguridad
+## 🔐 Seguridad
 **JWT**
 - Tokens firmados con HMAC SHA-256
 - Se envía por header:
   Authorization: Bearer <access_token>
 - Clase **JwtUtil**:
- - generateAccessToken()
- - generateRefreshToken()
- - extractUsername()
- - isTokenValid()
+ - **generateAccessToken()**
+ - **generateRefreshToken()**
+ - **extractUsername()**
+ - **isTokenValid()**
 
 **Spring Security**
 - Stateless (sin sesiones)
@@ -99,5 +99,74 @@ Construir una API REST de autenticación reutilizable para cualquier aplicación
 - Roles con **@PreAuthorize** y **@EnableMethodSecurity**
 
 **BCrypt**
-- Contraseñas hasheadas con BCryptPasswordEncoder
+- Contraseñas hasheadas con **BCryptPasswordEncoder**
 - Comparación segura en login
+
+---
+## 🛢️ Base de Datos
+**Desarrollo**
+- H2 en memoria
+- Consola accesible en:
+  **http://localhost:8080/h2-console**
+- JDBC:
+  **jdbc:h2:mem:testdb**
+
+**Producción**
+- Opcional: MySQL
+- Puedes activar el perfil **prod** y cambiar las credenciales
+
+---
+## ⚙️ Ejecución del proyecto
+
+```bash
+git clone https://github.com/tu-usuario/auth-service-java.git
+cd auth-service-java
+mvn spring-boot:run
+```
+- Swagger: **http://localhost:8080/swagger-ui/index.html**
+- H2 Console: **http://localhost:8080/h2-console**
+
+---
+## 🧪 Pruebas Automatizadas
+**Cubren:**
+- Registro:
+  - Éxito
+  - Email ya en uso
+- Login:
+  - Credenciales válidas
+  - Contraseña incorrecta
+  - Email no existente
+**Ejecutar:**
+```bash
+mvn test
+```
+- Framework: JUnit 5
+- Mocks: Mockito
+- Assertions claras con **assertThrows**, **assertEquals**, etc.
+
+---
+## 🧩 Cómo integrar esta API en otro proyecto
+Cualquier cliente (web o móvil) puede consumir esta API:
+
+**Proceso general:**
+1. POST a **/auth/register** → crea cuenta
+2. POST a **/auth/login** → recibe tokens
+3. Agrega **Authorization: Bearer <accessToken>** a tus peticiones
+4. Si el token expira, llama a **/auth/refresh**
+
+**Tecnologías compatibles:**
+- Frontend (React, Angular, Vue)
+- Aplicaciones móviles (Flutter, Android)
+- Otros microservicios
+
+---
+## 🐳 Próximamente: Docker
+Se agregará soporte para:
+- Dockerfile
+- docker-compose.yml (para levantar MySQL + API juntos)
+- Guía paso a paso para contenerizar y desplegar
+
+---
+## 📄 Licencia y Uso
+Este microservicio es de uso **público y educativo**, ideal para proyectos personales y de portafolio.
+__No está optimizado para entornos productivos sin ajustes adicionales.__

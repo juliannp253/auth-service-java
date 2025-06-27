@@ -87,10 +87,10 @@ Construir una API REST de autenticación reutilizable para cualquier aplicación
 - Se envía por header:
   Authorization: Bearer <access_token>
 - Clase **JwtUtil**:
- - **generateAccessToken()**
- - **generateRefreshToken()**
- - **extractUsername()**
- - **isTokenValid()**
+  - **generateAccessToken()**
+  - **generateRefreshToken()**
+  - **extractUsername()**
+  - **isTokenValid()**
 
 **Spring Security**
 - Stateless (sin sesiones)
@@ -119,7 +119,7 @@ Construir una API REST de autenticación reutilizable para cualquier aplicación
 ## ⚙️ Ejecución del proyecto
 
 ```bash
-git clone https://github.com/tu-usuario/auth-service-java.git
+git clone https://github.com/juliannp253/auth-service-java.git
 cd auth-service-java
 mvn spring-boot:run
 ```
@@ -128,6 +128,7 @@ mvn spring-boot:run
 
 ---
 ## 🧪 Pruebas Automatizadas
+
 **Cubren:**
 - Registro:
   - Éxito
@@ -136,6 +137,7 @@ mvn spring-boot:run
   - Credenciales válidas
   - Contraseña incorrecta
   - Email no existente
+
 **Ejecutar:**
 ```bash
 mvn test
@@ -169,4 +171,5 @@ Se agregará soporte para:
 ---
 ## 📄 Licencia y Uso
 Este microservicio es de uso **público y educativo**, ideal para proyectos personales y de portafolio.
+
 __No está optimizado para entornos productivos sin ajustes adicionales.__

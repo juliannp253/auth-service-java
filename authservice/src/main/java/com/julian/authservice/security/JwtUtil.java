@@ -65,7 +65,7 @@ public class JwtUtil {
                 .getBody();
     }
 
-    //  Tu método existente para la clave
+    //  Tu metodo existente para la clave
     private Key getSignKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
@@ -74,6 +74,7 @@ public class JwtUtil {
     public String generateAccessToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getEmail())
+                .claim("role", user.getRole().name()) // ← Aquí agregamos el rol al token
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15)) // 15 minutos
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
